@@ -100,6 +100,11 @@ class PageMaker(uweb3.DebuggingPageMaker):
     """Returns the index template"""
     return {'test': 'pagemaker return test'}
 
+  @uweb3.decorators.TemplateParser('../config.ini')
+  def TemplateTraversal(self):
+    """Tries to load an invalid template by traversing up the tree"""
+    return {'test': 'pagemaker return test'}
+
   def Redirect(self):
     """Redirects to the homepage"""
     return uweb3.Redirect('/')

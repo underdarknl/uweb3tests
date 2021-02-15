@@ -33,6 +33,7 @@ def main():
        ('/signedcookie/set', 'SignedCookieset'),
        ('/templatedecorator', 'TemplateDecorator'),
        ('/templateglobals', 'TemplateGlobals'),
+       ('/templatetraversal', 'TemplateTraversal'),
        ('/sqlite/read/(.*)', 'SqliteRead'),
        ('/mysql/read/(\d+)/?(.*)?', 'MysqlRead'),
        ('/mysql/write', 'MysqlWrite', 'POST'),

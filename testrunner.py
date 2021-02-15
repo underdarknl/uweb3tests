@@ -352,5 +352,25 @@ class ErrorTest(unittest.TestCase):
     self.assertEqual(r.status_code, 500)
     self.assertTrue(response in r.text)
 
+
+class PathTraversalTest(unittest.TestCase):
+  def test_500(self):
+    """Lets see if a deliberate invalid template returns an error"""
+    url = baseurl + 'templatetraversal'
+    response = escape_html("Could not load template")
+    invalidresponse = escape_html("[development]")
+    r = requests.get(url)
+    self.assertEqual(r.status_code, 500)
+    self.assertTrue(response in r.text)
+    self.assertFalse(invalidresponse in r.text)
+
+  def test_statictraversal(self):
+    """Lets see if our text file is served correctly"""
+    url = baseurl + 'static/../config.ini'
+    invalidresponse = escape_html("[development]")
+    r = requests.get(url)
+    self.assertEqual(r.status_code, 404)
+    self.assertFalse(invalidresponse in r.text)
+
 if __name__ == '__main__':
   unittest.main()

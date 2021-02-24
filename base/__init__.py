@@ -31,6 +31,7 @@ def main():
        ('/cookie/set/redirect', 'CookiesetRedirect'),
        ('/cookie/set/templatedecorated', 'TemplateDecoratedCookieset'),
        ('/signedcookie/set', 'SignedCookieset'),
+       ('/signedcookie/reflect', 'SignedCookieReflect'),
        ('/templatedecorator', 'TemplateDecorator'),
        ('/templateglobals', 'TemplateGlobals'),
        ('/templatetraversal', 'TemplateTraversal'),

@@ -63,19 +63,12 @@ class PageMaker(uweb3.DebuggingPageMaker):
 
     As signed cookies should not contain UTF8 we just use ascii."""
     data = 'this is an example cookie value set by uWeb'
-    cookie = model.SignedExample(self.connection)
-    cookie.Create({'key': data})
+    model.SignedExample.Create(self.connection, {'key': data})
     return self.parser.Parse('index.html')
 
   def SignedCookieReflect(self):
-    """Returns the index template and sets a signed cookie
-
-    As signed cookies should not contain UTF8 we just use ascii."""
-    data = 'this is an example cookie value set by uWeb'
-    cookie = model.SignedExample(self.connection)
-    cookie.Create({'key': data})
-    return self.parser.Parse('index.html')
-
+    """Returns signed cookie if valid."""
+    return model.SignedExample(self.connection)
 
   def HtmlArgumentReflect(self, numeric, string, optional="test"):
     """Returns the url arguments as parsed by the router."""

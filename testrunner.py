@@ -33,7 +33,7 @@ class ContentTests(unittest.TestCase):
   def test_content(self):
     """Lets see if the index route returns valid content"""
     r = requests.get(baseurl)
-    self.assertEqual(r.encoding, 'utf8')
+    self.assertEqual(r.encoding, 'utf-8')
     with open('base/templates/index.html', 'r') as template:
       templatecontent = template.read()
     self.assertEqual(r.status_code, 200)
@@ -43,7 +43,7 @@ class ContentTests(unittest.TestCase):
     """Lets see if the template decorated route returns valid content"""
     url = baseurl + 'templatedecorator'
     r = requests.get(url)
-    self.assertEqual(r.encoding, 'utf8')
+    self.assertEqual(r.encoding, 'utf-8')
     with open('base/templates/index.html', 'r') as template:
       templatecontent = template.read()
     self.assertEqual(r.status_code, 200)
@@ -55,7 +55,7 @@ class ContentTests(unittest.TestCase):
     data = {'key': 'value'}
     r = requests.post(url, data)
     self.assertEqual(r.status_code, 200)
-    self.assertEqual(r.headers['Content-Type'], 'application/json; charset=utf8')
+    self.assertEqual(r.headers['Content-Type'], 'application/json; charset=utf-8')
     self.assertEqual(r.json(), data)
 
   def test_returnNone(self):
@@ -90,6 +90,15 @@ pagemaker return test<br>
     self.assertEqual(r.status_code, 200)
     self.assertTrue(r.text.startswith(response))
 
+  def test_unknown_encoding(self):
+    """Lets see if our a record is served correctly as 'unknown' encoding"""
+    url = baseurl + 'mysql/read/1/unknown'
+    r = requests.get(url)
+    returnvalue = "Tank({'ID': 1, 'name': 'Living Room'})"
+    self.assertEqual(r.status_code, 200)
+    self.assertEqual(r.text, returnvalue)
+    self.assertEqual(r.headers['Content-Type'], 'unknown')
+
 class HeadersTests(unittest.TestCase):
   """Test the headers"""
 
@@ -113,12 +122,12 @@ class HeadersTests(unittest.TestCase):
     self.assertEqual(r.url, baseurl)
 
   def test_post(self):
-    """Lets see if the page returns a json/utf8 content-type"""
+    """Lets see if the page returns a json/utf-8 content-type"""
     url = baseurl + 'post'
     data = {'key': 'value'}
     r = requests.post(url, data)
     self.assertEqual(r.status_code, 200)
-    self.assertEqual(r.headers['Content-Type'], 'application/json; charset=utf8')
+    self.assertEqual(r.headers['Content-Type'], 'application/json; charset=utf-8')
 
 
 class RouteTests(unittest.TestCase):
@@ -148,7 +157,7 @@ class MethodTests(unittest.TestCase):
     """Lets see if the method route with GET returns valid content"""
     url = baseurl + 'method'
     r = requests.get(url)
-    self.assertEqual(r.encoding, 'utf8')
+    self.assertEqual(r.encoding, 'utf-8')
     with open('base/templates/index.html', 'r') as template:
       templatecontent = template.read()
     self.assertEqual(r.status_code, 200)
@@ -162,7 +171,7 @@ class MethodTests(unittest.TestCase):
     r = requests.post(url, data)
     self.assertEqual(r.status_code, 200)
     self.assertEqual(r.json(), data)
-    self.assertEqual(r.headers['Content-Type'], 'application/json; charset=utf8')
+    self.assertEqual(r.headers['Content-Type'], 'application/json; charset=utf-8')
 
   def test_put(self):
     """Lets see if the method route with PUT returns the value from our put"""
@@ -186,7 +195,7 @@ class MethodTests(unittest.TestCase):
     r = requests.delete(url)
     self.assertEqual(r.status_code, 200)
     self.assertEqual(r.text, 'delete done')
-    self.assertEqual(r.headers['Content-Type'], 'text/plain; charset=utf8')
+    self.assertEqual(r.headers['Content-Type'], 'text/plain; charset=utf-8')
 
 
 class CookieTests(unittest.TestCase):
@@ -201,7 +210,7 @@ class CookieTests(unittest.TestCase):
     self.assertEqual(r.cookies['example'], data)
 
   def test_setsecurecookie(self):
-    """Lets see if cookieset route gives us a cookie."""
+    """Lets see if cookieset route gives us a cookie with the secure flag on."""
     url = baseurl + 'cookie/set/secure'
     data = '"this is an example cookie value set by uWeb"'
     r = requests.get(url)
@@ -239,6 +248,43 @@ class CookieTests(unittest.TestCase):
     self.assertEqual(r.status_code, 200)
     self.assertEqual(r.text, data[1:-1])
 
+  def test_secure_clear(self):
+    """Lets see if we can set a cookie, and not have it reflected when we dont send it in for a second request."""
+
+    url_set = baseurl + 'signedcookie/set'
+    r_set = requests.get(url_set)
+
+    url_fetch = baseurl + 'signedcookie/reflect'
+    r_fetch = requests.get(url_fetch)
+
+    self.assertEqual(r_fetch.text, '')
+    self.assertEqual(r_fetch.cookies.keys(), [])
+    self.assertEqual(r_fetch.status_code, 200)
+
+  def test_secure_cookie(self):
+    """Lets see if secure cookieset reflects our cookie when send untamppered for a second request."""
+    session = requests.session()
+
+    url_set = baseurl + 'signedcookie/set'
+    r_set = session.get(url_set)
+
+    url_fetch = baseurl + 'signedcookie/reflect'
+    r_fetch = session.get(url_fetch)
+
+    content = escape_html("{'key': 'this is an example cookie value set by uWeb'}")
+    self.assertEqual(r_fetch.text, content)
+    self.assertEqual(r_set.cookies.keys(), ['signedExample'])
+    self.assertEqual(r_fetch.status_code, 200)
+
+  def test_secure_cookie_tampered(self):
+    """Lets see if cookieset route gives us a cookie even after a redirect."""
+    jar = requests.cookies.RequestsCookieJar()
+    jar.set('signedExample', 'tampered')
+    url_fetch = baseurl + 'signedcookie/reflect'
+    r_fetch = requests.get(url_fetch, cookies=jar)
+    self.assertEqual(r_fetch.text, "")
+    self.assertEqual(r_fetch.status_code, 200)
+
 
 class StaticTests(unittest.TestCase):
   """Test the static handler."""
@@ -248,7 +294,7 @@ class StaticTests(unittest.TestCase):
     r = requests.get(url)
     self.assertEqual(r.status_code, 200)
     self.assertEqual(r.text.rstrip(), 'text content')
-    self.assertEqual(r.headers['Content-Type'], 'text/plain; charset=utf8')
+    self.assertEqual(r.headers['Content-Type'], 'text/plain; charset=utf-8')
 
   def test_missingfile(self):
     """Lets see if our text file is served correctly"""
@@ -331,8 +377,7 @@ class EscapingTest(unittest.TestCase):
     response = '{"message": "Hello, World!"}'
     self.assertEqual(r.status_code, 200)
     self.assertEqual(r.json(), response)
-    self.assertEqual(r.headers['Content-Type'], 'application/json; charset=utf8')
-
+    self.assertEqual(r.headers['Content-Type'], 'application/json; charset=utf-8')
 
   def test_post_write_html_reflection(self):
     """Lets see if the page returns a posted and insterted mysql record"""
@@ -342,6 +387,7 @@ class EscapingTest(unittest.TestCase):
     r = requests.post(url, data)
     self.assertEqual(r.status_code, 200)
     self.assertTrue('<b>Tank</b>' not in r.text)
+
 
 class ErrorTest(unittest.TestCase):
   def test_500(self):

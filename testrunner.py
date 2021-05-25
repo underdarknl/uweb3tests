@@ -262,7 +262,8 @@ class CookieTests(unittest.TestCase):
     self.assertEqual(r_fetch.status_code, 200)
 
   def test_secure_cookie(self):
-    """Lets see if secure cookieset reflects our cookie when send untamppered for a second request."""
+    """Lets see if secure cookieset reflects our cookie when send ntampered for a second request.
+    This also checks"""
     session = requests.session()
 
     url_set = baseurl + 'signedcookie/set'
@@ -277,7 +278,7 @@ class CookieTests(unittest.TestCase):
     self.assertEqual(r_fetch.status_code, 200)
 
   def test_secure_cookie_tampered(self):
-    """Lets see if cookieset route gives us a cookie even after a redirect."""
+    """Lets see if Signed cookieset route gives us a cookie even after a redirect."""
     jar = requests.cookies.RequestsCookieJar()
     jar.set('signedExample', 'tampered')
     url_fetch = baseurl + 'signedcookie/reflect'
@@ -312,6 +313,25 @@ class StaticTests(unittest.TestCase):
     self.assertEqual(r.content, imagecontent)
     self.assertEqual(r.headers['Content-Type'], 'image/png')
 
+  def test_svgfile(self):
+    """Lets see if our SVG file is served correctly"""
+    url = baseurl + 'static/SVG_Logo.svg'
+    r = requests.get(url)
+    with open('base/static/SVG_Logo.svg', 'r') as template:
+      svgcontent = template.read()
+    self.assertEqual(r.status_code, 200)
+    self.assertEqual(r.text, svgcontent)
+    self.assertEqual(r.headers['Content-Type'], 'image/svg+xml')
+
+  def test_xmlfile(self):
+    """Lets see if our xml file is served correctly"""
+    url = baseurl + 'static/text.xml'
+    r = requests.get(url)
+    with open('base/static/text.xml', 'r') as template:
+      xmlcontent = template.read()
+    self.assertEqual(r.status_code, 200)
+    self.assertEqual(r.text, xmlcontent)
+    self.assertEqual(r.headers['Content-Type'], 'application/xml')
 
 class SQLitetests(unittest.TestCase):
   def test_record(self):

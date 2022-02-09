@@ -38,6 +38,7 @@ def main():
        ('/sqlite/read/(.*)', 'SqliteRead'),
        ('/mysql/read/(\d+)/?(.*)?', 'MysqlRead'),
        ('/mysql/write', 'MysqlWrite', 'POST'),
+       ('/jsonapi/read/(.*)', 'JsonApiRead'),
        ('/redirect', 'Redirect'),
        ('/static/(.*)', 'Static'),
        ('/error', 'ThrowError'),
@@ -46,6 +47,10 @@ def main():
        ('/json', 'ReturnJson'),
        ('/jsonstring', 'ReturnJsonString'),
        ('/contenttypedecorator', 'ReturnJsonDecorated'),
+       ('/sparsetests', 'SparseTests'),
+       ('/sparseteststarget', 'SparseTestsTarget'),
+       ('/template/(\w+)/(.*?)', 'SparseTemplateProvider'),
+       ('/sparse.js', 'SparseRenderedProvider'),
        ('/(.*)', 'FourOhFour')],
       os.path.dirname(__file__)
   )

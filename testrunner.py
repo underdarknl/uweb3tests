@@ -9,6 +9,7 @@ You can test test all the functions by issuing: python3 testrunner.py -v
 
 import unittest
 import requests
+import hashlib
 
 baseurl = 'http://127.0.0.1:8002/'
 def escape_html(string):
@@ -18,6 +19,11 @@ def escape_html(string):
   string = string.replace(">", "&gt;")
   string = string.replace('"', "&quot;")
   return string
+
+def HashContent(string):
+  """Helper function for hashing of template files, this is needed to allow
+  users to download raw templates on their own which they know the hash for."""
+  return hashlib.sha256(string.encode('utf-8')).hexdigest()
 
 class ConfigTest(unittest.TestCase):
   """Test if the server is using the config file"""
@@ -437,6 +443,29 @@ class PathTraversalTest(unittest.TestCase):
     r = requests.get(url)
     self.assertEqual(r.status_code, 404)
     self.assertFalse(invalidresponse in r.text)
+
+class SmartClientTests(unittest.TestCase):
+  """Test the 'smart' client functionality"""
+
+  def test_get(self):
+    """Lets see if the method route with GET returns valid content"""
+    url = baseurl + 'templateglobals'
+    r = requests.get(url, headers={'Accept':'application/json'})
+    self.assertEqual(r.encoding, 'utf-8')
+
+    with open('base/templates/test.html', 'r') as template:
+      templatehash = HashContent(template.read())
+
+    returnvalue = """{"template": "/test.html", "replacements": {"[header:part]": "path test", "[header:1:test:2]": "sparse path test", "[test]": "pagemaker return test", "[footer]": "&lt;b&gt;escaped html test&lt;/b&gt;"}, "template_hash": "%s"}""" % templatehash
+
+    self.assertEqual(r.status_code, 200)
+    self.assertMultiLineEqual(returnvalue, r.text)
+
+    templateurl = baseurl + 'template/%s/%s' % (templatehash, "test.html")
+    tr = requests.get(templateurl)
+    self.assertEqual(tr.encoding, 'utf-8')
+    self.assertEqual(tr.status_code, 200)
+    self.assertMultiLineEqual(templatehash, HashContent(tr.text))
 
 if __name__ == '__main__':
   unittest.main()

@@ -9,7 +9,7 @@ import uweb3
 # package imports
 from . import model
 
-class PageMaker(uweb3.DebuggingPageMaker):
+class PageMaker(uweb3.DebuggingPageMaker, uweb3.SparseAsyncPages):
   """Holds all the request handlers for the application"""
 
   def _PostInit(self):
@@ -93,6 +93,14 @@ class PageMaker(uweb3.DebuggingPageMaker):
     """Returns the index template"""
     return {'test': 'pagemaker return test'}
 
+  @uweb3.decorators.TemplateParser('sparse.html')
+  def SparseTests(self):
+    """Returns the sparse template"""
+
+  @uweb3.decorators.TemplateParser('sparse_target.html')
+  def SparseTestsTarget(self):
+    """Returns the sparse_target template"""
+
   @uweb3.decorators.TemplateParser('../config.ini')
   def TemplateTraversal(self):
     """Tries to load an invalid template by traversing up the tree"""
@@ -128,6 +136,15 @@ class PageMaker(uweb3.DebuggingPageMaker):
     """Writes to the Mysql db"""
     newtank = model.Tank.Create(self.connection, {'name': self.post.getfirst('name', 'Empty post')})
     return newtank
+
+  def JsonApiRead(self, post=1):
+    """Reads form the Json API"""
+    try:
+      return model.Posts.FromPrimary(self.connection, int(post))
+    except uweb3.model.NotExistError:
+      return uweb3.Response('No such post',
+                            httpcode=404,
+                            content_type='text/plain')
 
   def ThrowError(self):
     """The request could not be fulfilled, this returns a 500."""

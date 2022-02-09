@@ -11,3 +11,11 @@ class Fish(model.Record):
 
 class Tank(model.Record):
   """Model for the Mysql example"""
+
+class Posts(model.Record):
+  """Model for the Mysql example"""
+  _CONNECTOR = 'restfulljson'
+
+class Albums(model.Record):
+  """Model for the Mysql example"""
+  _CONNECTOR = 'restfulljson'

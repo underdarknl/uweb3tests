@@ -348,11 +348,11 @@ class SQLitetests(unittest.TestCase):
     self.assertEqual(r.status_code, 200)
     self.assertEqual(r.text, returnvalue)
 
-#   def test_missingfile(self):
-#     """Lets see if our missing record is served correctly"""
-#     url = baseurl + 'sqlite/read/3'
-#     r = requests.get(url)
-#     self.assertEqual(r.status_code, 404)
+  def test_missingfile(self):
+    """Lets see if our missing record is served correctly"""
+    url = baseurl + 'sqlite/read/3'
+    r = requests.get(url)
+    self.assertEqual(r.status_code, 404)
 
 
 class Mysqltests(unittest.TestCase):

@@ -1,5 +1,7 @@
 name: Event
 on:
+  push:
+      branches: [master]
   repository_dispatch:
     types: [uweb3event]
 jobs:
@@ -25,9 +27,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-      - name: Run uweb3tests
-        run: |
-          python3 -m unittest test.test_model
+      # - name: Run uweb3tests
+      #   run: |
+      #     python3 -m unittest testrunner
   build:
     runs-on: ubuntu-latest
     
